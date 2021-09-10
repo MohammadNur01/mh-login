@@ -136,7 +136,7 @@ class Auth extends CI_Controller
       $this->email->message('Click this link to verify your account : <a href="' . base_url() . 'auth/verify?email=' . $this->input->post('email') . '& token=' . urlencode($token) . '">Activated</a>');
     } else if ($type == 'forgot') {
       $this->email->subject('Reset Password!');
-      $this->email->message('Click this link to verify your account : <a href="' . base_url() . 'auth/verify?email=' . $this->input->post('email') . '& token=' . urlencode($token) . '">Activated</a>');
+      $this->email->message('Click this link to reset your password : <a href="' . base_url() . 'auth/resetpassword?email=' . $this->input->post('email') . '& token=' . urlencode($token) . '">Reset Password</a>');
     }
 
     if ($this->email->send()) {
@@ -227,6 +227,27 @@ class Auth extends CI_Controller
         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Email is not registered or activated!</div>');
         redirect('auth/forgotpassword');
       }
+    }
+  }
+
+  public function resetPassword()
+  {
+    $email = $this->input->get('email');
+    $token = $this->input->get('token');
+
+    $user = $this->db->get_where('user', ['email' => $email])->row_array();
+
+    if ($user) {
+      $user_token = $this->db->get_where('user_token', ['token' => $token])->row_array();
+
+      if ($user_token) {
+      } else {
+        $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong token.</div>');
+        redirect('auth/login');
+      }
+    } else {
+      $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong email.</div>');
+      redirect('auth/login');
     }
   }
 }
