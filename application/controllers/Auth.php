@@ -114,9 +114,9 @@ class Auth extends CI_Controller
   private function _sendEmail($token, $type)
   {
     $config = [
-      'protocol'  => "smtp",
-      'smtp_host' => "ssl://smtp.googlemail.com",
-      'smtp_user' => "andreaiyan0011@gmail.com",
+      'protocol'  => 'smtp',
+      'smtp_host' => 'ssl://smtp.googlemail.com',
+      'smtp_user' => 'andreaiyan0011@gmail.com',
       'smtp_pass' => '12345!',
       'smtp_port' => 465,
       'mailtype'  => 'html',
@@ -129,10 +129,11 @@ class Auth extends CI_Controller
 
     $this->email->from('andreaiyan0011@gmail.com', 'Andrea Iyan');
     $this->email->to($this->input->post('email'));
-    $this->email->subject('Account Verification');
+
 
     if ($type == 'verify') {
-      $this->email->message('Click this link to verify your account : <a href="' . base_url() . 'auth/verify?email=' . $this->input->post('email') . '& token=' . $token . '">Activated</a>');
+      $this->email->subject('Account Verification');
+      $this->email->message('Click this link to verify your account : <a href="' . base_url() . 'auth/verify?email=' . $this->input->post('email') . '& token=' . urlencode($token) . '">Activated</a>');
     }
 
     if ($this->email->send()) {
@@ -192,5 +193,13 @@ class Auth extends CI_Controller
   public function blocked()
   {
     $this->load->view('auth/blocked');
+  }
+
+  public function forgotPassword()
+  {
+    $data['title'] = 'Forgot Password';
+    $this->load->view('templates/auth_header', $data);
+    $this->load->view('auth/forgot-password');
+    $this->load->view('templates/auth_footer');
   }
 }
