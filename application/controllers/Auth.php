@@ -143,6 +143,27 @@ class Auth extends CI_Controller
     }
   }
 
+  public function ferify()
+  {
+    $email = $this->input->get('email');
+    $token = $this->input->get('token');
+
+    $user = $this->db->get_where('user', ['email' => $email])->row_array();
+
+    if ($user) {
+      $user_token = $this->db->get_where('user_token', ['token' => $token])->row_array();
+
+      if ($user_token) {
+      } else {
+        $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Account activation failed!. Wrong token.</div>');
+        redirect('auth');
+      }
+    } else {
+      $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Account activation failed!. Wrong email.</div>');
+      redirect('auth');
+    }
+  }
+
   public function logout()
   {
     $this->session->unset_userdata('email');
