@@ -241,6 +241,8 @@ class Auth extends CI_Controller
       $user_token = $this->db->get_where('user_token', ['token' => $token])->row_array();
 
       if ($user_token) {
+        $this->session->set_userdata('reset_email', $email);
+        $this->changePassword();
       } else {
         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong token.</div>');
         redirect('auth/login');
@@ -248,6 +250,33 @@ class Auth extends CI_Controller
     } else {
       $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong email.</div>');
       redirect('auth/login');
+    }
+  }
+
+  public function changePassword()
+  {
+    if (!$this->session->userdata('reset_email')) {
+      redirect('auth');
+    }
+    $this->form_validation->set_rules('password1', 'Password', 'trim|required|min_length[3]|matches[password2]');
+    $this->form_validation->set_rules('password2', 'Repeat Password', 'trim|required|min_length[3]|matches[password1]');
+    if ($this->form_validation->run() == false) {
+      $data['title'] = 'Change Password';
+      $this->load->view('templates/auth_header', $data);
+      $this->load->view('auth/change-password');
+      $this->load->view('templates/auth_footer');
+    } else {
+      $password = password_hash($this->input->post('password1'), PASSWORD_DEFAULT);
+      $email = $this->session->userdata('reset_email');
+
+      $this->db->set('password', $password);
+      $this->db->where('email', $email);
+      $this->db->update('user');
+
+      $this->session->unset_userdata('reset_email');
+
+      $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Password has been changed! Please login.</div>');
+      redirect('auth');
     }
   }
 }
